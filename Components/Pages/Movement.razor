@@ -22,7 +22,7 @@ else
             <button onclick="@CreateOpenMovement">Open</button>
         }
         @if (LatestMovementType == MovementType.Open) { 
-            Card: <input type="text" id="cardAmount" @bind-value="@cardAmount" />
+            <span> Card: </span> <input type="text" id="cardAmount" @bind-value="@cardAmount" />
             <button onclick="@CreateCloseMovement">Close</button>
         }
         
@@ -65,19 +65,18 @@ else
     protected async Task CreateOpenMovement() {
         Console.WriteLine("CreateOpenMovement....");
         await Task.Delay(100);
-        now = DateTime.UtcNow;
         var movement = MovementService.Open(now,cashAmount);
         ReloadMovements();
     }
     protected async Task CreateCloseMovement() {
         Console.WriteLine("CreateCloseMovement....");
         await Task.Delay(100);
-        now = DateTime.UtcNow;
         var movement = MovementService.Close(now,cashAmount,cardAmount);
         ReloadMovements();
     }
     private void ReloadMovements() {
         var startDate = DateOnly.FromDateTime(DateTime.Now);
         movements = MovementService.GetMovements((startDate.Year,startDate.Month)).ToArray();
+        now = DateTime.UtcNow;
     }
 }
