@@ -36,7 +36,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var movement in movements)
+            @foreach (var movement in OrderedMovements)
             {
                 <tr>
                     <td>@movement.Date.ToString("dd-MM-yyyy HH:mm:ss")</td>

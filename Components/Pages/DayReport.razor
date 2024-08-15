@@ -17,6 +17,8 @@
 <div>
     Total Cash: @movementsSummary.CashAmount
     Total Card: @movementsSummary.CardAmount
+    Total: @movementsSummary.GetTotal()
+
 </div>
 <div>
 Day Summaries:
@@ -26,6 +28,7 @@ Day Summaries:
             <th>Date</th>
             <th>Cash</th>
             <th>Card</th>
+            <th>Total</th>
         </tr>
     </thead>
     <tbody>
@@ -35,12 +38,14 @@ Day Summaries:
                 <td>@dayMovement.Date.ToString("dd-MM-yyyy")</td>
                 <td>@dayMovement.CashAmount</td>
                 <td>@dayMovement.CardAmount</td>
+                <td>@dayMovement.GetTotal()</td>
             </tr>
         }
     </tbody>
 </table>
 </div>
-
+<div>
+    Movements:
 <table class="table">
     <thead>
         <tr>
@@ -62,7 +67,7 @@ Day Summaries:
         }
     </tbody>
 </table>
-
+</div>
 
 @code {
 @using soulFoodReport.Services
