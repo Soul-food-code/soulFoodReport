@@ -10,6 +10,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<IMovementService, DefaultMovementService>();
 
 var app = builder.Build();
+SoulFoodReportConfig.SetConfigurationManger(builder.Configuration);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
