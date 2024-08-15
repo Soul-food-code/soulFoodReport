@@ -1,0 +1,83 @@
+﻿@page "/movements"
+@using soulFoodReport.Services
+@using System.Linq;
+
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+@inject IMovementService MovementService
+
+<h1>Movements</h1>
+
+@if (movements == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        Date: <input type="text" id="movementDateTime" @bind-value="@now" />
+        Cash : <input type="text" id="amount" @bind-value="@cashAmount" /> 
+        @if (LatestMovementType == null || LatestMovementType != MovementType.Open) { 
+            <button onclick="@CreateOpenMovement">Open</button>
+        }
+        @if (LatestMovementType == MovementType.Open) { 
+            Card: <input type="text" id="cardAmount" @bind-value="@cardAmount" />
+            <button onclick="@CreateCloseMovement">Close</button>
+        }
+        
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var movement in movements)
+            {
+                <tr>
+                    <td>@movement.Date.ToString("dd-MM-yyyy HH:mm:ss")</td>
+                    <td>@movement.Type.ToString()</td>
+                    <td>@movement.Amount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+@using soulFoodReport.Services
+    private IEnumerable<IMovement> movements = Enumerable.Empty<IMovement>(); 
+
+    private IMovement[]? OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
+    private DateTime now;
+    private MovementType? LatestMovementType => movements.Count() == 0 ? null : OrderedMovements?.Last()?.Type;
+    private decimal cashAmount;
+    private decimal cardAmount;
+    protected override async Task OnInitializedAsync()
+    {
+        ReloadMovements();
+        now = DateTime.UtcNow;
+    }
+    protected async Task CreateOpenMovement() {
+        Console.WriteLine("CreateOpenMovement....");
+        await Task.Delay(100);
+        now = DateTime.UtcNow;
+        var movement = MovementService.Open(now,cashAmount);
+        ReloadMovements();
+    }
+    protected async Task CreateCloseMovement() {
+        Console.WriteLine("CreateCloseMovement....");
+        await Task.Delay(100);
+        now = DateTime.UtcNow;
+        var movement = MovementService.Close(now,cashAmount,cardAmount);
+        ReloadMovements();
+    }
+    private void ReloadMovements() {
+        var startDate = DateOnly.FromDateTime(DateTime.Now);
+        movements = MovementService.GetMovements((startDate.Year,startDate.Month)).ToArray();
+    }
+}
