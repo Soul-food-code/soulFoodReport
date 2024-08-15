@@ -89,6 +89,7 @@ namespace soulFoodReport.Persistency {
             }
             return periodFolders.ToArray();
         }
-        private static string baseFolder = Path.Combine(Directory.GetCurrentDirectory(),SUB_FOLDER);
+        private static string mainPersistencyFolder = SoulFoodReportConfig.Instance.PersistencyMainFolder ?? Directory.GetCurrentDirectory();
+        private static string baseFolder = Path.Combine(mainPersistencyFolder,SUB_FOLDER);
     }
 }
