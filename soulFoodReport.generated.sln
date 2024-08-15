@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "soulFoodReport", "soulFoodReport.csproj", "{609CBA67-2CFF-4B1F-A024-0F4B78C26D75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "soulFoodReport", "soulFoodReport.csproj", "{82D53592-3B95-4C13-BB3C-E02C0B459D59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{609CBA67-2CFF-4B1F-A024-0F4B78C26D75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{609CBA67-2CFF-4B1F-A024-0F4B78C26D75}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{609CBA67-2CFF-4B1F-A024-0F4B78C26D75}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{609CBA67-2CFF-4B1F-A024-0F4B78C26D75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82D53592-3B95-4C13-BB3C-E02C0B459D59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82D53592-3B95-4C13-BB3C-E02C0B459D59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82D53592-3B95-4C13-BB3C-E02C0B459D59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82D53592-3B95-4C13-BB3C-E02C0B459D59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
