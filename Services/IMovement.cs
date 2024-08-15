@@ -32,5 +32,8 @@ namespace soulFoodReport.Services {
     public static class MovementHelper {
         public static string GetFileName(this IMovement movement)
             => $"{movement.Date.ToString("yyyy-MM-dd_HH-mm-ss")}_{movement.Type}_{movement.Source}_MOV.json";
+
+        public static bool IsAnExpense(this IMovement movement)
+            => movement.Type == MovementType.Withdrawal || movement.Type == MovementType.Expense;
     }
 }
