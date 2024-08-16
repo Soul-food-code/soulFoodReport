@@ -7,7 +7,7 @@
 
 @inject IExpenseService ExpenseService
 
-<h1>Expnses</h1>
+<h1>Expenses</h1>
 
 @if (expenses == null)
 {
@@ -33,10 +33,20 @@ else
         </select>
 
         Amount : <input type="text" id="amount" @bind-value="@Amount" /> 
-        Dscription : <input type="text" id="descr" @bind-value="@Description" /> 
+        Description : <input type="text" id="descr" @bind-value="@Description" /> 
         <button onclick="@AddExpense">Add</button>
         
     </div>
+
+    <p> Expenses Filter </p>
+
+    <div>
+        <span> From Date: </span> <input type="text" id="fromDate" @bind-value="@fromDate" />
+        <span>To Date: </span> <input type="text" id="toDate" @bind-value="@toDate" />
+        <button onclick="@ReloadExpenses">Search</button>
+    
+    </div>
+    <p> Total Expenses : @OrderedExpenses.Sum(e => e.Amount)</p>
     <table class="table">
         <thead>
             <tr>
@@ -60,6 +70,63 @@ else
             }
         </tbody>
     </table>
+    <p> <b>Supplies details (@suppliesExpensesSummary.FromDate - @suppliesExpensesSummary.ToDate)</b></p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Supplies</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var expense in suppliesExpensesSummary.SuppliesData)
+            {
+                <tr>
+                    <td>@expense.Supplies</td>
+                    <td>@expense.Amount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p> <b>Expense Type details (@typeExpensesSummary.FromDate - @typeExpensesSummary.ToDate)</b></p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var expense in typeExpensesSummary.ExpenseTypeData)
+            {
+                <tr>
+                    <td>@expense.Type</td>
+                    <td>@expense.Amount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p> <b>Weeks details</b></p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>FromDate</th>
+                <th>ToDate</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var expense in periodExpensesSummaries)
+            {
+                <tr>
+                    <td>@expense.FromDate</td>
+                    <td>@expense.ToDate</td>
+                    <td>@expense.Amount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
 }
 
 @code {
@@ -74,16 +141,24 @@ else
     private string Description {get;set;}
     private string[] ExpenseTypes;
     private string[] allSupplies;
+    private ISuppliesExpensesSummary? suppliesExpensesSummary;
+    private ITypeExpensesSummary? typeExpensesSummary;
+    private IEnumerable<IPeriodExpensesSummary> periodExpensesSummaries;
+    private DateOnly fromDate;
+    private DateOnly toDate;
 
     protected override async Task OnInitializedAsync()
     {
+        now = DateTime.UtcNow;
+        fromDate = new DateOnly(now.Year,now.Month,1);
+        toDate = new DateOnly(now.Year,now.Month,DateTime.DaysInMonth(now.Year,now.Month));
+
         ReloadExpenses();
         ExpenseTypes = Enum.GetNames<ExpenseType>().ToArray();
         allSupplies = SoulFoodReportConfig.Instance.Supplies;
         ExpType = ExpenseTypes[0];
         Supplies = allSupplies[0];
 
-        now = DateTime.UtcNow;
     }
     protected async Task AddExpense() {
         Console.WriteLine("CreateOpenMovement....");
@@ -96,7 +171,10 @@ else
     }
     private void ReloadExpenses() {
         var startDate = DateOnly.FromDateTime(DateTime.Now);
-        expenses = ExpenseService.GetExpenses((startDate.Year,startDate.Month)).ToArray();
+        expenses = ExpenseService.GetExpenses(fromDate,toDate).ToArray();
+        suppliesExpensesSummary = ExpensesSummary.CreateGroupedBySupplies(expenses);
+        typeExpensesSummary = ExpensesSummary.CreateGroupedByExpType(expenses);
+        periodExpensesSummaries = ExpensesSummary.CreateGroupedByWeeks(expenses);
         now = DateTime.UtcNow;
     }
 }
