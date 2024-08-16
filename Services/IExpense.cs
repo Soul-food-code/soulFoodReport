@@ -1,4 +1,6 @@
 
+using Newtonsoft.Json;
+
 namespace soulFoodReport.Services {
 
     public enum ExpenseType { Food, Drink, Design, Decoration, Stationary, Equipment, Utensils, Other }
@@ -13,15 +15,19 @@ namespace soulFoodReport.Services {
 
     public class DefaultExpense : IExpense
     {
-        public DefaultExpense(IMovement movement, ExpenseType expenseType,string supplies, string description)
-        {
-            Date = movement.Date;
-            Amount = movement.Amount;
-            Source = movement.Source;
-            Type = movement.Type;
+        [JsonConstructor]
+        public DefaultExpense(DateTime date, decimal amount, MovementType type,SourceType source,ExpenseType expenseType,string supplies, string description) {
+            Date = date;
+            Amount = amount;
+            Source = source;
+            Type = type;
             ExpenseType = expenseType;
             Supplies = supplies;
             Description = description;
+
+        }
+        public DefaultExpense(IMovement movement, ExpenseType expenseType,string supplies, string description):this(movement.Date,movement.Amount,movement.Type,movement.Source,expenseType,supplies,description)
+        {
         }
 
         public DateTime Date { get; }

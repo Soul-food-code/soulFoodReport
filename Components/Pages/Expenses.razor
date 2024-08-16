@@ -18,21 +18,22 @@ else
     <div>
         Date: <input type="text" id="movementDateTime" @bind-value="@now" />
         ExpenseType: 
-        <select @bind="expType">
+        <select @bind="@ExpType">
             @foreach (var exp in ExpenseTypes)
             {
                 <option value="@exp">@exp</option>
             }
         </select>
         Supplies: 
-        <select @bind="supplies">
+        <select @bind="@Supplies">
             @foreach (var supp in allSupplies)
             {
                 <option value="@supp">@supp</option>
             }
         </select>
 
-        Amount : <input type="text" id="amount" @bind-value="@amount" /> 
+        Amount : <input type="text" id="amount" @bind-value="@Amount" /> 
+        Dscription : <input type="text" id="descr" @bind-value="@Description" /> 
         <button onclick="@AddExpense">Add</button>
         
     </div>
@@ -63,10 +64,10 @@ else
 
     private IMovement[]? OrderedExpenses => expenses.OrderBy(m => m.Date).ToArray();
     private DateTime now;
-    private decimal amount;
-    private string expType;
-    private string supplies;
-    private string description;
+    private decimal Amount {get;set;}
+    private string ExpType {get;set;}
+    private string Supplies {get;set;}
+    private string Description {get;set;}
     private string[] ExpenseTypes;
     private string[] allSupplies;
 
@@ -74,15 +75,18 @@ else
     {
         ReloadExpenses();
         ExpenseTypes = Enum.GetNames<ExpenseType>().ToArray();
-        allSupplies = new string[] {}; //SoulFoodReportConfig.Instance.Supplies;
+        allSupplies = SoulFoodReportConfig.Instance.Supplies;
+        ExpType = ExpenseTypes[0];
+        Supplies = allSupplies[0];
+
         now = DateTime.UtcNow;
     }
     protected async Task AddExpense() {
         Console.WriteLine("CreateOpenMovement....");
         await Task.Delay(100);
-        var movement = soulFoodReport.Services.Movement.Create(now,amount,MovementType.Expense,SourceType.Card);
-        var expenseType = Enum.Parse<ExpenseType>(expType);
-        var expense = soulFoodReport.Services.Expense.Create(movement,expenseType,supplies,description);
+        var movement = soulFoodReport.Services.Movement.Create(now,Amount,MovementType.Expense,SourceType.Card);
+        var expenseType = Enum.Parse<ExpenseType>(ExpType);
+        var expense = soulFoodReport.Services.Expense.Create(movement,expenseType,Supplies,Description);
         var expenseStatus = ExpenseService.Add(expense);
         ReloadExpenses();
     }
