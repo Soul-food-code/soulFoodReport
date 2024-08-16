@@ -15,7 +15,8 @@
 }
 else
 {
-    <div>
+    <p> Create new movement </p>
+    <div class="bottom-three">
         Date: <input type="text" id="movementDateTime" @bind-value="@now" />
         Cash : <input type="text" id="amount" @bind-value="@cashAmount" /> 
         @if (LatestMovementType == null || LatestMovementType != MovementType.Open) { 
@@ -24,14 +25,24 @@ else
         @if (LatestMovementType == MovementType.Open) { 
             <span> Card: </span> <input type="text" id="cardAmount" @bind-value="@cardAmount" />
             <button onclick="@CreateCloseMovement">Close</button>
-        }
-        
+        }        
     </div>
+    
+    <p> Movement Filter </p>
+
+    <div>
+        <span> From Date: </span> <input type="text" id="fromDate" @bind-value="@fromDate" />
+        <span>To Date: </span> <input type="text" id="toDate" @bind-value="@toDate" />
+        <button onclick="@ReloadMovements">Search</button>
+    
+    </div>
+
     <table class="table">
         <thead>
             <tr>
                 <th>Date</th>
                 <th>Type</th>
+                <th>Source</th>
                 <th>Amount</th>
             </tr>
         </thead>
@@ -41,12 +52,19 @@ else
                 <tr>
                     <td>@movement.Date.ToString("dd-MM-yyyy HH:mm:ss")</td>
                     <td>@movement.Type.ToString()</td>
+                    <td>@movement.Source.ToString()</td>
                     <td>@movement.Amount</td>
                 </tr>
             }
         </tbody>
     </table>
 }
+
+<style>
+  .bottom-three {
+     margin-bottom: 2cm;
+  }
+</style>
 
 @code {
 @using soulFoodReport.Services
@@ -57,10 +75,15 @@ else
     private MovementType? LatestMovementType => movements.Count() == 0 ? null : OrderedMovements?.Last()?.Type;
     private decimal cashAmount;
     private decimal cardAmount;
+    private DateOnly fromDate;
+    private DateOnly toDate;
+
     protected override async Task OnInitializedAsync()
     {
-        ReloadMovements();
         now = DateTime.UtcNow;
+        fromDate = new DateOnly(now.Year,now.Month,1);
+        toDate = new DateOnly(now.Year,now.Month,DateTime.DaysInMonth(now.Year,now.Month));
+        ReloadMovements();
     }
     protected async Task CreateOpenMovement() {
         Console.WriteLine("CreateOpenMovement....");
@@ -74,9 +97,9 @@ else
         var movement = MovementService.Close(now,cashAmount,cardAmount);
         ReloadMovements();
     }
-    private void ReloadMovements() {
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        movements = MovementService.GetMovements((startDate.Year,startDate.Month)).ToArray();
+    protected void ReloadMovements() {
+        movements = MovementService.GetMovements(fromDate,toDate).ToArray();
         now = DateTime.UtcNow;
     }
+ 
 }

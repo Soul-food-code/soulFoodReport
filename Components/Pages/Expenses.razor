@@ -42,6 +42,8 @@ else
             <tr>
                 <th>Date</th>
                 <th>Type</th>
+                <th>ExpenseType</th>
+                <th>Supplies</th>
                 <th>Amount</th>
             </tr>
         </thead>
@@ -51,6 +53,8 @@ else
                 <tr>
                     <td>@expense.Date.ToString("dd-MM-yyyy HH:mm:ss")</td>
                     <td>@expense.Type.ToString()</td>
+                    <td>@expense.ExpenseType.ToString()</td>
+                    <td>@expense.Supplies</td>
                     <td>@expense.Amount</td>
                 </tr>
             }
@@ -62,7 +66,7 @@ else
 @using soulFoodReport.Services
     private IEnumerable<IExpense> expenses = Enumerable.Empty<IExpense>(); 
 
-    private IMovement[]? OrderedExpenses => expenses.OrderBy(m => m.Date).ToArray();
+    private IExpense[]? OrderedExpenses => expenses.OrderBy(m => m.Date).ToArray();
     private DateTime now;
     private decimal Amount {get;set;}
     private string ExpType {get;set;}

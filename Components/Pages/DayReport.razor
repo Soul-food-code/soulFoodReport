@@ -6,6 +6,8 @@
 @rendermode InteractiveServer
 
 @inject IMovementService MovementService
+@inject IExpenseService ExpenseService
+
 
 <h1>Day Report</h1>
 <div>
@@ -17,7 +19,9 @@
 <div>
     Total Cash: @movementsSummary.CashAmount
     Total Card: @movementsSummary.CardAmount
-    Total: @movementsSummary.GetTotal()
+    Total IN: @movementsSummary.GetTotal()
+    Total Net: @movementsSummary.GetTotalNet()
+
 
 </div>
 <div>
@@ -28,7 +32,9 @@ Day Summaries:
             <th>Date</th>
             <th>Cash</th>
             <th>Card</th>
-            <th>Total</th>
+            <th>Total IN</th>
+            <th>Expenses</th>
+            <th>Notes</th>
         </tr>
     </thead>
     <tbody>
@@ -39,6 +45,8 @@ Day Summaries:
                 <td>@dayMovement.CashAmount</td>
                 <td>@dayMovement.CardAmount</td>
                 <td>@dayMovement.GetTotal()</td>
+                <td>@dayMovement.ExpenseAmount</td>
+                <td>@string.Join("<br>",dayMovement.Notes)</td>
             </tr>
         }
     </tbody>
@@ -87,7 +95,8 @@ Day Summaries:
         toDate = DateTime.UtcNow;
     }
     protected void SearchMovement() {
-        movements = MovementService.GetMovements(DateOnly.FromDateTime(fromDate),DateOnly.FromDateTime(toDate)).ToArray();
-        movementsSummary = MovementSummary.Create(movements);
+        movements = MovementService.GetMovements(DateOnly.FromDateTime(fromDate),DateOnly.FromDateTime(toDate));
+        var expenses = ExpenseService.GetExpenses(DateOnly.FromDateTime(fromDate),DateOnly.FromDateTime(toDate));
+        movementsSummary = MovementSummary.Create(movements.Concat(expenses));
     }
 }
