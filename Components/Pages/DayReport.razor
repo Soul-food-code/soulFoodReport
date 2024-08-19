@@ -17,10 +17,10 @@
     
 </div>
 <div>
-    Total Cash: @movementsSummary.CashAmount
-    Total Card: @movementsSummary.CardAmount
-    Total IN: @movementsSummary.GetTotal()
-    Total Net: @movementsSummary.GetTotalNet()
+    Total Cash: @movementsSummary?.CashAmount
+    Total Card: @movementsSummary?.CardAmount
+    Total IN: @movementsSummary?.GetTotal()
+    Total Net: @movementsSummary?.GetTotalNet()
 
 
 </div>
@@ -38,16 +38,18 @@ Day Summaries:
         </tr>
     </thead>
     <tbody>
-        @foreach (var dayMovement in movementsSummary.DaySummaries)
-        {
-            <tr>
-                <td>@dayMovement.Date.ToString("dd-MM-yyyy")</td>
-                <td>@dayMovement.CashAmount</td>
-                <td>@dayMovement.CardAmount</td>
-                <td>@dayMovement.GetTotal()</td>
-                <td>@dayMovement.ExpenseAmount</td>
-                <td>@string.Join("<br>",dayMovement.Notes)</td>
-            </tr>
+        @if (movementsSummary != null) {
+            @foreach (var dayMovement in movementsSummary.DaySummaries)
+            {
+                <tr>
+                    <td>@dayMovement.Date.ToString("dd-MM-yyyy")</td>
+                    <td>@dayMovement.CashAmount</td>
+                    <td>@dayMovement.CardAmount</td>
+                    <td>@dayMovement.GetTotal()</td>
+                    <td>@dayMovement.ExpenseAmount</td>
+                    <td>@string.Join("<br>",dayMovement.Notes)</td>
+                </tr>
+            }
         }
     </tbody>
 </table>
@@ -64,6 +66,7 @@ Day Summaries:
         </tr>
     </thead>
     <tbody>
+        
         @foreach (var movement in OrderedMovements)
         {
             <tr>
@@ -78,21 +81,19 @@ Day Summaries:
 </div>
 
 @code {
-@using soulFoodReport.Services
     private IEnumerable<IMovement> movements = Enumerable.Empty<IMovement>(); 
 
-    private IMovement[]? OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
+    private IMovement[] OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
     private DateTime fromDate;
     private DateTime toDate;
     private MovementType? LatestMovementType => movements.Count() == 0 ? null : OrderedMovements?.Last()?.Type;
-    private decimal totCashAmount;
-    private decimal totCardAmount;
     private IMovementsSummary? movementsSummary = null;
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         SearchMovement();
         fromDate = DateTime.UtcNow;
         toDate = DateTime.UtcNow;
+        return Task.CompletedTask;
     }
     protected void SearchMovement() {
         movements = MovementService.GetMovements(DateOnly.FromDateTime(fromDate),DateOnly.FromDateTime(toDate));

@@ -12,8 +12,8 @@ public class SoulFoodReportConfig {
     private static ConfigurationManager? _configurationManager;
     private class DefaultSoulFoodReportConfig : ISoulFoodReportConfig
     {
-        public string PersistencyMainFolder => _configurationManager.GetValue<string>("PersistencyMainFolder");
-        public string[] Supplies =>_configurationManager.GetValue<string>("Supplies").Split(',');
+        public string PersistencyMainFolder => _configurationManager?.GetValue<string>("PersistencyMainFolder") ?? "";
+        public string[] Supplies =>_configurationManager?.GetValue<string>("Supplies")?.Split(',') ?? ["Main"];
 
     }
 }

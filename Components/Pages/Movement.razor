@@ -17,8 +17,8 @@ else
 {
     <p> Create new movement </p>
     <div class="bottom-three">
-        Date: <input type="text" id="movementDateTime" @bind-value="@now" />
-        Cash : <input type="text" id="amount" @bind-value="@cashAmount" /> 
+        <span> Date: </span> <input type="text" id="movementDateTime" @bind-value="@now" />
+        <span> Cash: </span> <input type="text" id="amount" @bind-value="@cashAmount" /> 
         @if (LatestMovementType == null || LatestMovementType != MovementType.Open) { 
             <button onclick="@CreateOpenMovement">Open</button>
         }
@@ -67,10 +67,9 @@ else
 </style>
 
 @code {
-@using soulFoodReport.Services
     private IEnumerable<IMovement> movements = Enumerable.Empty<IMovement>(); 
 
-    private IMovement[]? OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
+    private IMovement[] OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
     private DateTime now;
     private MovementType? LatestMovementType => movements.Count() == 0 ? null : OrderedMovements?.Last()?.Type;
     private decimal cashAmount;
@@ -78,12 +77,13 @@ else
     private DateOnly fromDate;
     private DateOnly toDate;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         now = DateTime.UtcNow;
         fromDate = new DateOnly(now.Year,now.Month,1);
         toDate = new DateOnly(now.Year,now.Month,DateTime.DaysInMonth(now.Year,now.Month));
         ReloadMovements();
+        return Task.CompletedTask;
     }
     protected async Task CreateOpenMovement() {
         Console.WriteLine("CreateOpenMovement....");
