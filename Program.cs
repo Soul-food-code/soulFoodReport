@@ -8,6 +8,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddScoped<IMovementService, DefaultMovementService>();
+builder.Services.AddScoped<IExpenseService, DefaultExpenseService>();
 
 var app = builder.Build();
 SoulFoodReportConfig.SetConfigurationManger(builder.Configuration);

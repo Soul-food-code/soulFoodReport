@@ -6,6 +6,8 @@
 @rendermode InteractiveServer
 
 @inject IMovementService MovementService
+@inject IExpenseService ExpenseService
+
 
 <h1>Day Report</h1>
 <div>
@@ -15,9 +17,11 @@
     
 </div>
 <div>
-    Total Cash: @movementsSummary.CashAmount
-    Total Card: @movementsSummary.CardAmount
-    Total: @movementsSummary.GetTotal()
+    Total Cash: @movementsSummary?.CashAmount
+    Total Card: @movementsSummary?.CardAmount
+    Total IN: @movementsSummary?.GetTotal()
+    Total Net: @movementsSummary?.GetTotalNet()
+
 
 </div>
 <div>
@@ -28,18 +32,24 @@ Day Summaries:
             <th>Date</th>
             <th>Cash</th>
             <th>Card</th>
-            <th>Total</th>
+            <th>Total IN</th>
+            <th>Expenses</th>
+            <th>Notes</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var dayMovement in movementsSummary.DaySummaries)
-        {
-            <tr>
-                <td>@dayMovement.Date.ToString("dd-MM-yyyy")</td>
-                <td>@dayMovement.CashAmount</td>
-                <td>@dayMovement.CardAmount</td>
-                <td>@dayMovement.GetTotal()</td>
-            </tr>
+        @if (movementsSummary != null) {
+            @foreach (var dayMovement in movementsSummary.DaySummaries)
+            {
+                <tr>
+                    <td>@dayMovement.Date.ToString("dd-MM-yyyy")</td>
+                    <td>@dayMovement.CashAmount</td>
+                    <td>@dayMovement.CardAmount</td>
+                    <td>@dayMovement.GetTotal()</td>
+                    <td>@dayMovement.ExpenseAmount</td>
+                    <td>@string.Join("<br>",dayMovement.Notes)</td>
+                </tr>
+            }
         }
     </tbody>
 </table>
@@ -56,6 +66,7 @@ Day Summaries:
         </tr>
     </thead>
     <tbody>
+        
         @foreach (var movement in OrderedMovements)
         {
             <tr>
@@ -70,24 +81,23 @@ Day Summaries:
 </div>
 
 @code {
-@using soulFoodReport.Services
     private IEnumerable<IMovement> movements = Enumerable.Empty<IMovement>(); 
 
-    private IMovement[]? OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
+    private IMovement[] OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
     private DateTime fromDate;
     private DateTime toDate;
     private MovementType? LatestMovementType => movements.Count() == 0 ? null : OrderedMovements?.Last()?.Type;
-    private decimal totCashAmount;
-    private decimal totCardAmount;
     private IMovementsSummary? movementsSummary = null;
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         SearchMovement();
         fromDate = DateTime.UtcNow;
         toDate = DateTime.UtcNow;
+        return Task.CompletedTask;
     }
     protected void SearchMovement() {
-        movements = MovementService.GetMovements(DateOnly.FromDateTime(fromDate),DateOnly.FromDateTime(toDate)).ToArray();
-        movementsSummary = MovementSummary.Create(movements);
+        movements = MovementService.GetMovements(DateOnly.FromDateTime(fromDate),DateOnly.FromDateTime(toDate));
+        var expenses = ExpenseService.GetExpenses(DateOnly.FromDateTime(fromDate),DateOnly.FromDateTime(toDate));
+        movementsSummary = MovementSummary.Create(movements.Concat(expenses));
     }
 }

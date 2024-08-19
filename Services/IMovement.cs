@@ -1,4 +1,7 @@
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
 namespace soulFoodReport.Services {
 
     public enum MovementType { Open, Close, Withdrawal, Deposit, Expense }
@@ -25,7 +28,11 @@ namespace soulFoodReport.Services {
 
         public DateTime Date { get; }
         public decimal Amount { get; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
         public MovementType Type { get; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
         public SourceType Source { get; }
     }
 

@@ -50,7 +50,7 @@ namespace soulFoodReport.Services {
                     var closeDrawerMov = dayMovements.Where(m => m.Source == SourceType.Drawer && m.Type == MovementType.Close).OrderBy(m => m.Date).ToArray();
                     Console.Out.WriteLine("DefaultMovementsSummary handling date:" + currDate + " openDrawerMov#: " + openDrawerMov.Length + " closeDrawerMov#:" + closeDrawerMov.Length);
 
-                    var cardAmount =  dayMovements.Where(m => m.Source == SourceType.Card).Sum(m => m.Amount);
+                    var cardAmount =  dayMovements.Where(m => m.Source == SourceType.Card && !m.IsAnExpense()).Sum(m => m.Amount);
                     var expenseAmount = dayMovements.Where(m => m.IsAnExpense()).Sum(m => m.Amount);
                     totExpenseAmount += expenseAmount;
                     totCardAmount += cardAmount;
@@ -100,6 +100,7 @@ namespace soulFoodReport.Services {
 
     public static class SummaryHelper {
         public static decimal GetTotal(this IMovementsSummary movementsSummary) => movementsSummary.CardAmount + movementsSummary.CashAmount;
+        public static decimal GetTotalNet(this IMovementsSummary movementsSummary) => movementsSummary.CardAmount + movementsSummary.CashAmount - movementsSummary.ExpenseAmount;
         public static decimal GetTotal(this IDaySummary daySummary) => daySummary.CardAmount + daySummary.CashAmount;
 
     }
