@@ -8,6 +8,7 @@
 @inject IMovementService MovementService
 
 <h1>Movements</h1>
+<Modal @ref="modal" />
 <ConfirmDialog @ref="dialog" />
 
 @if (movements == null)
@@ -45,6 +46,7 @@ else
                 <th>Type</th>
                 <th>Source</th>
                 <th>Amount</th>
+                <th>-</th>
             </tr>
         </thead>
         <tbody>
@@ -55,6 +57,8 @@ else
                     <td>@movement.Type.ToString()</td>
                     <td>@movement.Source.ToString()</td>
                     <td>@movement.Amount</td>
+                    <td><Button Color="ButtonColor.Primary" @onclick="() => EditMovement(movement)">Edit</Button></td>
+
                 </tr>
             }
         </tbody>
@@ -68,6 +72,8 @@ else
 </style>
 
 @code {
+    private Modal modal = default!;
+    private string? message;
     private IEnumerable<IMovement> movements = Enumerable.Empty<IMovement>(); 
 
     private IMovement[] OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
@@ -111,6 +117,11 @@ else
             var movement = MovementService.Close(movementDT,cashAmount,cardAmount);
             ReloadMovements();
         }
+    }
+    protected async Task EditMovement(IMovement selectedMovement) {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("movement", selectedMovement);
+        await modal.ShowAsync<MovementEdit>(title: "Movement Details", parameters: parameters);
     }
     protected void ReloadMovements() {
         movements = MovementService.GetMovements(fromDate,toDate).ToArray();
