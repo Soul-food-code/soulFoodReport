@@ -1,4 +1,4 @@
-@page "/movements"
+﻿@page "/movements"
 @using soulFoodReport.Services
 @using System.Linq;
 
@@ -57,7 +57,8 @@ else
                     <td>@movement.Type.ToString()</td>
                     <td>@movement.Source.ToString()</td>
                     <td>@movement.Amount</td>
-                    <td><Button Color="ButtonColor.Primary" @onclick="() => EditMovement(movement)">Edit</Button></td>
+                    <td><Button Color="ButtonColor.Primary" @onclick="() => EditMovement(movement)">Edit</Button>
+                        <Button Color="ButtonColor.Primary" @onclick="() => DeleteMovement(movement)">Delete</Button></td>
 
                 </tr>
             }
@@ -121,14 +122,24 @@ else
     protected async Task EditMovement(IMovement selectedMovement) {
         var parameters = new Dictionary<string, object>();
         parameters.Add("movement", selectedMovement);
+        parameters.Add("OnclickCallback", EventCallback.Factory.Create<IMovement>(this, UpdateMovement));
         await modal.ShowAsync<MovementEdit>(title: "Movement Details", parameters: parameters);
     }
+    protected async Task DeleteMovement(IMovement selectedMovement) {
+        MovementService.Delete(selectedMovement);
+        ReloadMovements();
+    }
+
     protected void ReloadMovements() {
         movements = MovementService.GetMovements(fromDate,toDate).ToArray();
         ResetDateTimeToNow();
     }
     private void ResetDateTimeToNow() {
         latestDo = DateOnly.FromDateTime(DateTime.Now);
+    }
+    private void UpdateMovement(IMovement movement) {
+        MovementService.Update(movement);
+        ReloadMovements();
     }
     private TimeOnly CurrentTimeOnly => TimeOnly.FromDateTime(DateTime.Now);
     private DateTime GetMovementDT() =>  latestDo.ToDateTime(CurrentTimeOnly).AddSeconds(DateTime.Now.Second);

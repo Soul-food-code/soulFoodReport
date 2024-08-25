@@ -7,6 +7,8 @@ namespace soulFoodReport.Services {
         bool Close(DateTime dateTime, decimal cashAmount,decimal cardAmount);
         IEnumerable<IMovement> GetMovements((int Year,int Month) period);
         IEnumerable<IMovement> GetMovements(DateOnly fromDate,DateOnly toDate);
+        bool Update(IMovement movement);
+        bool Delete(IMovement movement);
 
     }
 
@@ -43,6 +45,9 @@ namespace soulFoodReport.Services {
 
         public IEnumerable<IMovement> GetMovements((int Year,int Month) period)  => MovementPersistency.LoadMovements(period);
         public IEnumerable<IMovement> GetMovements(DateOnly fromDate,DateOnly toDate) => MovementPersistency.LoadMovements(fromDate,toDate);
-    
+
+        public bool Update(IMovement movement) => MovementPersistency.Save(movement);
+        public bool Delete(IMovement movement) => MovementPersistency.Delete(movement);
+        
     }
 }

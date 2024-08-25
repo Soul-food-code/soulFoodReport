@@ -1,4 +1,6 @@
-﻿@attribute [StreamRendering]
+﻿@using soulFoodReport.Services
+
+@attribute [StreamRendering]
 @rendermode InteractiveServer
 
 <Modal @ref="modal" />
@@ -22,6 +24,7 @@
     private decimal amount;
 
     [Parameter] public IMovement movement {get;set;}
+    [Parameter] public EventCallback<IMovement> OnClickCallback { get; set; }
 
     private DateTime movementDT;
     protected override Task OnInitializedAsync()
@@ -37,6 +40,9 @@
             message2: "Do you want to proceed?");
         if (confirmation) {    
             await Task.Delay(100);
+            movement = soulFoodReport.Services.Movement.Create(movement.Date,amount,movement.Type,movement.Source);
+            await OnClickCallback.InvokeAsync(movement);
+            await modal.HideAsync();
         }
     }
     private TimeOnly CurrentTimeOnly => TimeOnly.FromDateTime(DateTime.Now);
