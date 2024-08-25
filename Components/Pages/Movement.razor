@@ -1,4 +1,4 @@
-﻿@page "/movements"
+@page "/movements"
 @using soulFoodReport.Services
 @using System.Linq;
 
@@ -78,7 +78,7 @@ else
 
     private IMovement[] OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
     private DateOnly latestDo = DateOnly.FromDateTime(DateTime.Now);
-    private MovementType? LatestMovementType => movements.Count() == 0 ? null : OrderedMovements?.Last()?.Type;
+    private MovementType? LatestMovementType => movements.Count() == 0 ? null : OrderedMovements.Where(m => m.Type == MovementType.Open || m.Type == MovementType.Close)?.Last()?.Type;
     private decimal cashAmount;
     private decimal cardAmount;
     private DateOnly fromDate;
