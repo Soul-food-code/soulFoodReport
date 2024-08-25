@@ -126,8 +126,14 @@ else
         await modal.ShowAsync<MovementEdit>(title: "Movement Details", parameters: parameters);
     }
     protected async Task DeleteMovement(IMovement selectedMovement) {
-        MovementService.Delete(selectedMovement);
-        ReloadMovements();
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to Delete the selected movement?",
+            message1: $"You are deleting an {selectedMovement.Type} with amount:{selectedMovement.Amount}",
+            message2: "Do you want to proceed?");
+        if (confirmation) {    
+            MovementService.Delete(selectedMovement);
+            ReloadMovements();
+        }
     }
 
     protected void ReloadMovements() {
