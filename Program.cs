@@ -9,6 +9,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<IMovementService, DefaultMovementService>();
 builder.Services.AddScoped<IExpenseService, DefaultExpenseService>();
+builder.Services.AddBlazorBootstrap();
 
 var app = builder.Build();
 SoulFoodReportConfig.SetConfigurationManger(builder.Configuration);
