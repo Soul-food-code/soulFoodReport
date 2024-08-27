@@ -50,7 +50,11 @@ namespace soulFoodReport.Services {
                     var closeDrawerMov = dayMovements.Where(m => m.Source == SourceType.Drawer && m.Type == MovementType.Close).OrderBy(m => m.Date).ToArray();
                     Console.Out.WriteLine("DefaultMovementsSummary handling date:" + currDate + " openDrawerMov#: " + openDrawerMov.Length + " closeDrawerMov#:" + closeDrawerMov.Length);
 
-                    var cardAmount =  dayMovements.Where(m => m.Source == SourceType.Card && !m.IsAnExpense()).Sum(m => m.Amount);
+                    var dayCardMovements = dayMovements.Where(m => m.Source == SourceType.Card && !m.IsAnExpense());
+                    var cardAmount =  dayCardMovements.Sum(m => m.Amount);
+                    
+                    var dayCardMovementsToProcess = dayCardMovements;
+
                     var expenseAmount = dayMovements.Where(m => m.IsAnExpense()).Sum(m => m.Amount);
                     totExpenseAmount += expenseAmount;
                     totCardAmount += cardAmount;
@@ -65,7 +69,12 @@ namespace soulFoodReport.Services {
                             Console.Out.WriteLine("DefaultMovementsSummary handling date:" + currDate + " close: " + closeDrawerMov[i].Amount + " open:" + openDrawerMov[i].Amount);
 
                             totCashAmount += cashDiff;
-                            daySummaries.Add(MovementSummary.CreateDay(currDate,cashDiff,cardAmount,expenseAmount));
+                            decimal partialCardAmount = 0;
+                            var dtDeltaToCloseDrawerMov = closeDrawerMov[i].Date.AddSeconds(2);
+                                partialCardAmount = dayCardMovementsToProcess.Where(m => m.Date <= dtDeltaToCloseDrawerMov).Sum(m => m.Amount);
+
+                            daySummaries.Add(MovementSummary.CreateDay(currDate,cashDiff,partialCardAmount,expenseAmount));
+                            dayCardMovementsToProcess = dayCardMovementsToProcess.Where(m => m.Date >= dtDeltaToCloseDrawerMov);
                         }
                     }
 
