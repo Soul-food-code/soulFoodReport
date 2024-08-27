@@ -4,7 +4,7 @@ namespace soulFoodReport.Services {
 
     public interface IMovementService {
         bool Open(DateTime dateTime, decimal amount);
-        bool Close(DateTime dateTime, decimal cashAmount,decimal cardAmount);
+        bool Close(DateTime dateTime, decimal cashAmount,(bool IsPartial, decimal Amount) card);
         IEnumerable<IMovement> GetMovements((int Year,int Month) period);
         IEnumerable<IMovement> GetMovements(DateOnly fromDate,DateOnly toDate);
         bool Update(IMovement movement);
@@ -26,12 +26,22 @@ namespace soulFoodReport.Services {
             }
 
         }
-        public bool Close(DateTime dateTime, decimal cashAmount,decimal cardAmount)
+        public bool Close(DateTime dateTime, decimal cashAmount,(bool IsPartial, decimal Amount) card)
         {
             try {
                 var drawerMovement = Movement.Create(dateTime,cashAmount,MovementType.Close,SourceType.Drawer);
                 var drawerMovInserted = MovementPersistency.Save(drawerMovement);
-                var cardMovement = Movement.Create(dateTime,cardAmount,MovementType.Deposit,SourceType.Card);
+                var amountToPersist = card.Amount;
+                if (!card.IsPartial) { // I've to calculate the partial amount starting from the latest card movement within the same day 
+                    var movDate = DateOnly.FromDateTime(dateTime);
+                    var dayMovements = GetMovements(movDate,movDate);
+                    var dayCardMovements = dayMovements.Where(m => m.Source==SourceType.Card).OrderBy(m => m.Date);
+                    var latestCardMov = dayCardMovements.LastOrDefault();
+                    if (latestCardMov != null) {
+                        amountToPersist = card.Amount - latestCardMov.Amount;
+                    }
+                }
+                var cardMovement = Movement.Create(dateTime,amountToPersist,MovementType.Deposit,SourceType.Card);
                 var cardMovInserted = MovementPersistency.Save(cardMovement);
 
                 return drawerMovInserted && cardMovInserted;

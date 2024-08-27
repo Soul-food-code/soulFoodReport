@@ -25,6 +25,7 @@ else
             <div class="col-1"> <Button Color="ButtonColor.Primary" @onclick="() => CreateOpenMovement()">Open</Button> </div> 
         }
         @if (LatestMovementType == MovementType.Open) { 
+            <div class="col-1"> <input type="checkbox" @bind-value="isPartial"> <label class="col-1 col-form-label"> Partial </label> </div> 
             <label class="col-1 col-form-label"> Card: </label> <div class="col-2"> <CurrencyInput TValue="decimal" Locale="es-ES" @bind-Value="@cardAmount" MinimumFractionDigits="2" EnableMinMax="true" Min="0" Max="4999" Placeholder="Card amount"/> </div>
             <div class="col-1"> <Button Color="ButtonColor.Primary" @onclick="() => CreateCloseMovement()">Close</Button> </div>
         }        
@@ -82,6 +83,7 @@ else
     private MovementType? LatestMovementType => movements.Count() == 0 ? null : OrderedMovements.Where(m => m.Type == MovementType.Open || m.Type == MovementType.Close)?.Last()?.Type;
     private decimal cashAmount;
     private decimal cardAmount;
+    private bool isPartial;
     private DateOnly fromDate;
     private DateOnly toDate;
     private ConfirmDialog dialog;
@@ -115,7 +117,7 @@ else
         if (confirmation) {    
             await Task.Delay(100);
             var movementDT = GetMovementDT();
-            var movement = MovementService.Close(movementDT,cashAmount,cardAmount);
+            var movement = MovementService.Close(movementDT,cashAmount,(isPartial,cardAmount));
             ReloadMovements();
         }
     }
