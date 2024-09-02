@@ -71,7 +71,7 @@ namespace soulFoodReport.Services {
                             totCashAmount += cashDiff;
                             decimal partialCardAmount = 0;
                             var dtDeltaToCloseDrawerMov = closeDrawerMov[i].Date.AddSeconds(2);
-                                partialCardAmount = dayCardMovementsToProcess.Where(m => m.Date <= dtDeltaToCloseDrawerMov).Sum(m => m.Amount);
+                            partialCardAmount = dayCardMovementsToProcess.Where(m => m.Date <= dtDeltaToCloseDrawerMov).Sum(m => m.Amount);
 
                             daySummaries.Add(MovementSummary.CreateDay(currDate,cashDiff,partialCardAmount,expenseAmount));
                             dayCardMovementsToProcess = dayCardMovementsToProcess.Where(m => m.Date >= dtDeltaToCloseDrawerMov);
