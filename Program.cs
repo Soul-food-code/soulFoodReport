@@ -2,6 +2,8 @@ using soulFoodReport.Components;
 using soulFoodReport.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("/config/appsettings.Development.json", true, true);
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

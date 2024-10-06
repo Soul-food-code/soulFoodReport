@@ -8,6 +8,8 @@
 @inject IExpenseService ExpenseService
 
 <h1>Expenses</h1>
+<Modal @ref="modal" />
+<ConfirmDialog @ref="dialog" />
 
 @if (expenses == null)
 {
@@ -15,36 +17,57 @@
 }
 else
 {
-    <div>
-        Date: <input type="text" id="movementDateTime" @bind-value="@now" />
-        ExpenseType: 
+    <div class="form-group row">
+        <label class="col-1 col-form-label"> Date:</label> 
+        <div class="col-2">
+            <DateInput TValue="DateTime" @bind-Value="@now" Placeholder="Enter Mov. Date" />
+        </div>
+        <label class="col-1 col-form-label"> Expense Type:</label> 
+        <div class="col-1">
         <select @bind="@ExpType">
             @foreach (var exp in ExpenseTypes)
             {
                 <option value="@exp">@exp</option>
             }
         </select>
-        Supplies: 
+        </div>
+
+        <label class="col-1 col-form-label">Supplies: </label> 
+        <div class="col-1">
         <select @bind="@Supplies">
             @foreach (var supp in allSupplies)
             {
                 <option value="@supp">@supp</option>
             }
         </select>
-
-        Amount : <input type="text" id="amount" @bind-value="@Amount" /> 
-        Description : <input type="text" id="descr" @bind-value="@Description" /> 
-        <button onclick="@AddExpense">Add</button>
-        
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-1 col-form-label">Amount: </label> 
+        <div class="col-1">
+            <CurrencyInput TValue="decimal" Locale="es-ES" @bind-Value="@Amount" MinimumFractionDigits="2" EnableMinMax="true" Min="0" Max="4999" Placeholder="Amount"/>
+        </div>
+        <label class="col-1 col-form-label">Description: </label> 
+        <div class="col-2">
+        <input type="text" id="descr" @bind-value="@Description" /> 
+        </div>
+        <div class="col-1"> <Button Color="ButtonColor.Primary" @onclick="() => AddExpense()">Add</Button> </div>
     </div>
 
     <p> Expenses Filter </p>
 
-    <div>
-        <span> From Date: </span> <input type="text" id="fromDate" @bind-value="@fromDate" />
-        <span>To Date: </span> <input type="text" id="toDate" @bind-value="@toDate" />
-        <button onclick="@ReloadExpenses">Search</button>
-    
+     <div class="form-group row">
+        <label class="col-1 col-form-label">From Date: </label> 
+        <div class="col-2">
+            <DateInput TValue="DateOnly" @bind-Value="@fromDate" Placeholder="From Date" /> 
+        </div>
+        <label class="col-1 col-form-label">To Date: </label> 
+        <div class="col-2">
+            <DateInput TValue="DateOnly" @bind-Value="@toDate" Placeholder="To Date" />
+        </div>
+        <div class="col-1">
+            <button onclick="@ReloadExpenses">Search</button>
+        </div>
     </div>
     <p> Total Expenses : @OrderedExpenses.Sum(e => e.Amount)</p>
 <Tabs @ref="tabs">
@@ -79,6 +102,23 @@ else
             <GridColumn TItem="IExpense" HeaderText="Amount" PropertyName="Amount" SortKeySelector="item => item.Amount">
                 @context.Amount
             </GridColumn>
+            <GridColumn TItem="IExpense" Filterable="false" Sortable="false">
+                <HeaderContent>
+                            Edit
+                </HeaderContent>
+                <ChildContent>
+                    <Button Color="ButtonColor.Primary" @onclick="() => EditExpenses(context)">Edit</Button>
+                </ChildContent>
+            </GridColumn>    
+            <GridColumn TItem="IExpense" Filterable="false" Sortable="false">
+                <HeaderContent>
+                            Delete
+                </HeaderContent>
+                <ChildContent>
+                    <Button Color="ButtonColor.Primary" @onclick="() => DeleteExpense(context)">Delete</Button>
+                </ChildContent>
+            </GridColumn>    
+
         </GridColumns>
 
     </Grid>
@@ -161,6 +201,9 @@ else
 }
 
 @code {
+    private ConfirmDialog dialog;
+    private Modal modal = default!;
+
     private IEnumerable<IExpense> expenses = Enumerable.Empty<IExpense>(); 
 
     private IExpense[] OrderedExpenses => expenses.OrderBy(m => m.Date).ToArray();
@@ -206,12 +249,39 @@ else
     }
     protected async Task AddExpense() {
         Console.WriteLine("CreateOpenMovement....");
-        await Task.Delay(100);
-        var movement = soulFoodReport.Services.Movement.Create(now,Amount,MovementType.Expense,SourceType.Card);
         var expenseType = Enum.Parse<ExpenseType>(ExpType);
-        var expense = soulFoodReport.Services.Expense.Create(movement,expenseType,Supplies,Description);
-        var expenseStatus = ExpenseService.Add(expense);
-        await ReloadExpenses();
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to add an expense?",
+            message1: $"You are creating it with {Amount}€ and type:{expenseType}",
+            message2: "Do you want to proceed?");
+        if (confirmation) {    
+            await Task.Delay(100);
+            var movement = soulFoodReport.Services.Movement.Create(now,Amount,MovementType.Expense,SourceType.Card);
+            var expense = soulFoodReport.Services.Expense.Create(movement,expenseType,Supplies,Description);
+            var expenseStatus = ExpenseService.Add(expense);
+            await ReloadExpenses();
+        }
+    }
+
+    protected async Task EditExpenses(IExpense selectedExpense) {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("expense", selectedExpense);
+        parameters.Add("OnclickCallback", EventCallback.Factory.Create<IExpense>(this, UpdateExpense));
+        await modal.ShowAsync<ExpenseEdit>(title: "Expense Details", parameters: parameters);
+    }
+    protected async Task DeleteExpense(IExpense selectedExpense) {
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to Delete the selected expense?",
+            message1: $"You are deleting an {selectedExpense.Type} with amount:{selectedExpense.Amount}",
+            message2: "Do you want to proceed?");
+        if (confirmation) {    
+            ExpenseService.Delete(selectedExpense);
+            ReloadExpenses();
+        }
+    }
+    private void UpdateExpense(IExpense expense) {
+        ExpenseService.Update(expense);
+        ReloadExpenses();
     }
     private async Task ReloadExpenses() {
         var startDate = DateOnly.FromDateTime(DateTime.Now);

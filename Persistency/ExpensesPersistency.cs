@@ -25,6 +25,24 @@ namespace soulFoodReport.Persistency {
             }
 
         }
+        public static bool Delete(IExpense expense)
+        {
+            try {
+                var periodFolder = $"{expense.Date.Year}-{expense.Date.Month.ToString("00")}";
+                var fullPath = Path.Combine(baseFolder,periodFolder);
+                var filePath = Path.Combine(fullPath,expense.GetFileName());
+                if (File.Exists(filePath)) {
+                    File.Delete(filePath);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex) {
+                Console.Error.WriteLine(ex);
+                return false;
+            }
+
+        }        
         public static IEnumerable<IExpense> LoadExpenses((int Year,int Month) period) {
             try {
                 Console.Out.WriteLine("LoadExpenses with period: " + period);

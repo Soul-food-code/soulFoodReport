@@ -74,6 +74,7 @@ else
 </style>
 
 @code {
+    private ConfirmDialog dialog;
     private Modal modal = default!;
     private string? message;
     private IEnumerable<IMovement> movements = Enumerable.Empty<IMovement>(); 
@@ -86,7 +87,6 @@ else
     private bool isPartial;
     private DateOnly fromDate;
     private DateOnly toDate;
-    private ConfirmDialog dialog;
     protected override Task OnInitializedAsync()
     {
         ResetDateTimeToNow();
