@@ -6,6 +6,7 @@ namespace soulFoodReport.Services {
     public enum ExpenseType { Food, Drink, Design, Decoration, Stationary, Equipment, Utensils, Other }
     public interface IExpense : IMovement {
         ExpenseType ExpenseType {get;}
+        string ExpType { get; }
         string Supplies {get;}
         string  Description {get;}
     }
@@ -22,6 +23,7 @@ namespace soulFoodReport.Services {
             Source = source;
             Type = type;
             ExpenseType = expenseType;
+            ExpType = ExpenseType.ToString();
             Supplies = supplies;
             Description = description;
 
@@ -33,6 +35,7 @@ namespace soulFoodReport.Services {
         public DateTime Date { get; }
         public decimal Amount { get; }
         public ExpenseType ExpenseType {get;}
+        public string ExpType {get;}
         public string Supplies {get;}
         public string  Description {get;}
         public SourceType Source {get;}
