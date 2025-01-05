@@ -32,4 +32,8 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+IServiceProvider serviceProvider = builder.Services.BuildServiceProvider();
+var expService = serviceProvider.GetService<IExpenseService>();
+expService.Upgrade();
+
 app.Run();

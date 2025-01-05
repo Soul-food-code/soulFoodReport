@@ -6,6 +6,7 @@ namespace soulFoodReport.Services {
         bool Add(IExpense expense);
         bool Delete(IExpense expense);
         bool Update(IExpense expense);
+        void Upgrade();
         IEnumerable<IExpense> GetExpenses((int Year,int Month) period);
         IEnumerable<IExpense> GetExpenses(DateOnly fromDate,DateOnly toDate);
 
@@ -42,6 +43,12 @@ namespace soulFoodReport.Services {
         }        
         public IEnumerable<IExpense> GetExpenses((int Year,int Month) period)  => ExpensesPersistency.LoadExpenses(period);
         public IEnumerable<IExpense> GetExpenses(DateOnly fromDate,DateOnly toDate) => ExpensesPersistency.LoadExpenses(fromDate,toDate);
-    
+
+        public void Upgrade() {
+            var oldExpenses = ExpensesPersistency.LoadExpenses(new DateOnly(2024,05,01),new DateOnly(2025,01,30));
+            foreach (var exp in oldExpenses) {
+                Update(exp);
+            }
+        }
     }
 }
