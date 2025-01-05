@@ -8,6 +8,8 @@
 @inject IExpenseService ExpenseService
 
 <h1>Expenses</h1>
+<Modal @ref="modal" />
+<ConfirmDialog @ref="dialog" />
 
 @if (expenses == null)
 {
@@ -15,61 +17,116 @@
 }
 else
 {
-    <div>
-        Date: <input type="text" id="movementDateTime" @bind-value="@now" />
-        ExpenseType: 
+    <div class="form-group row">
+        <label class="col-1 col-form-label"> Date:</label> 
+        <div class="col-2">
+            <DateInput TValue="DateTime" @bind-Value="@now" Placeholder="Enter Mov. Date" />
+        </div>
+        <label class="col-1 col-form-label"> Expense Type:</label> 
+        <div class="col-1">
         <select @bind="@ExpType">
             @foreach (var exp in ExpenseTypes)
             {
                 <option value="@exp">@exp</option>
             }
         </select>
-        Supplies: 
+        </div>
+
+        <label class="col-1 col-form-label">Supplies: </label> 
+        <div class="col-1">
         <select @bind="@Supplies">
             @foreach (var supp in allSupplies)
             {
                 <option value="@supp">@supp</option>
             }
         </select>
-
-        Amount : <input type="text" id="amount" @bind-value="@Amount" /> 
-        Description : <input type="text" id="descr" @bind-value="@Description" /> 
-        <button onclick="@AddExpense">Add</button>
-        
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-1 col-form-label">Amount: </label> 
+        <div class="col-1">
+            <CurrencyInput TValue="decimal" Locale="es-ES" @bind-Value="@Amount" MinimumFractionDigits="2" EnableMinMax="true" Min="0" Max="4999" Placeholder="Amount"/>
+        </div>
+        <label class="col-1 col-form-label">Description: </label> 
+        <div class="col-2">
+        <input type="text" id="descr" @bind-value="@Description" /> 
+        </div>
+        <div class="col-1"> <Button Color="ButtonColor.Primary" @onclick="() => AddExpense()">Add</Button> </div>
     </div>
 
     <p> Expenses Filter </p>
 
-    <div>
-        <span> From Date: </span> <input type="text" id="fromDate" @bind-value="@fromDate" />
-        <span>To Date: </span> <input type="text" id="toDate" @bind-value="@toDate" />
-        <button onclick="@ReloadExpenses">Search</button>
-    
+     <div class="form-group row">
+        <label class="col-1 col-form-label">From Date: </label> 
+        <div class="col-2">
+            <DateInput TValue="DateOnly" @bind-Value="@fromDate" Placeholder="From Date" /> 
+        </div>
+        <label class="col-1 col-form-label">To Date: </label> 
+        <div class="col-2">
+            <DateInput TValue="DateOnly" @bind-Value="@toDate" Placeholder="To Date" />
+        </div>
+        <div class="col-1">
+            <button onclick="@ReloadExpenses">Search</button>
+        </div>
     </div>
     <p> Total Expenses : @OrderedExpenses.Sum(e => e.Amount)</p>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>ExpenseType</th>
-                <th>Supplies</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var expense in OrderedExpenses)
-            {
-                <tr>
-                    <td>@expense.Date.ToString("dd-MM-yyyy HH:mm:ss")</td>
-                    <td>@expense.Type.ToString()</td>
-                    <td>@expense.ExpenseType.ToString()</td>
-                    <td>@expense.Supplies</td>
-                    <td>@expense.Amount</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<Tabs @ref="tabs">
+<Tab Title="Details" Active="true">
+    <Content>
+    <Grid @ref="expGrid" 
+        TItem="IExpense"
+        Class="table table-hover table-bordered table-striped"
+        DataProvider="ExpensesDataProvider"
+        AllowFiltering="true"
+        AllowPaging="true"
+        PageSize="30"
+        AllowSorting="true"
+        AllowSelection="true"
+        SelectionMode="GridSelectionMode.Multiple"
+        SelectedItemsChanged="OnSelectedItemsChanged"
+        Responsive="true">
+
+        <GridColumns>
+            <GridColumn TItem="IExpense" HeaderText="Date" PropertyName="Date" SortKeySelector="item => item.Date">
+                @context.Date.ToString("dd-MM-yyyy HH:mm:ss")
+            </GridColumn>
+            <GridColumn TItem="IExpense" HeaderText="Type" PropertyName="Type">
+                @context.Type
+            </GridColumn>
+            <GridColumn TItem="IExpense" HeaderText="ExpenseType" PropertyName="ExpenseType" SortKeySelector="item => item.ExpenseType">
+                @context.ExpenseType
+            </GridColumn>
+            <GridColumn TItem="IExpense" HeaderText="Supplies" PropertyName="Supplies" SortKeySelector="item => item.Supplies">
+                @context.Supplies
+            </GridColumn>
+            <GridColumn TItem="IExpense" HeaderText="Amount" PropertyName="Amount" SortKeySelector="item => item.Amount">
+                @context.Amount
+            </GridColumn>
+            <GridColumn TItem="IExpense" Filterable="false" Sortable="false">
+                <HeaderContent>
+                            Edit
+                </HeaderContent>
+                <ChildContent>
+                    <Button Color="ButtonColor.Primary" @onclick="() => EditExpenses(context)">Edit</Button>
+                </ChildContent>
+            </GridColumn>    
+            <GridColumn TItem="IExpense" Filterable="false" Sortable="false">
+                <HeaderContent>
+                            Delete
+                </HeaderContent>
+                <ChildContent>
+                    <Button Color="ButtonColor.Primary" @onclick="() => DeleteExpense(context)">Delete</Button>
+                </ChildContent>
+            </GridColumn>    
+
+        </GridColumns>
+
+    </Grid>
+            
+    </Content>
+</Tab>
+<Tab Title="Supplies">
+    <Content>
     @if (suppliesExpensesSummary!= null) {
         <p> <b>Supplies details (@suppliesExpensesSummary.FromDate - @suppliesExpensesSummary.ToDate)</b></p>
         <table class="table">
@@ -83,13 +140,17 @@ else
                 @foreach (var expense in suppliesExpensesSummary.SuppliesData)
                 {
                     <tr>
-                        <td>@expense.Supplies</td>
+                        <td> <Button Color="ButtonColor.Link" @onclick="() => GetDetailsBySupplies(expense.Supplies)"> @expense.Supplies </Button> </td>
                         <td>@expense.Amount</td>
                     </tr>
                 }
             </tbody>
         </table>
     }
+    </Content>
+</Tab>
+<Tab Title="Types">
+    <Content>
     @if (typeExpensesSummary != null) {
         <p> <b>Expense Type details (@typeExpensesSummary.FromDate - @typeExpensesSummary.ToDate)</b></p>
         <table class="table">
@@ -110,6 +171,10 @@ else
             </tbody>
         </table>
     }
+    </Content>
+</Tab>
+<Tab Title="Weeks">
+    <Content>
     <p> <b>Weeks details</b></p>
     <table class="table">
         <thead>
@@ -130,10 +195,15 @@ else
             }
         </tbody>
     </table>
-    
+    </Content>
+</Tab>
+</Tabs>
 }
 
 @code {
+    private ConfirmDialog dialog;
+    private Modal modal = default!;
+
     private IEnumerable<IExpense> expenses = Enumerable.Empty<IExpense>(); 
 
     private IExpense[] OrderedExpenses => expenses.OrderBy(m => m.Date).ToArray();
@@ -149,35 +219,90 @@ else
     private IEnumerable<IPeriodExpensesSummary> periodExpensesSummaries = Enumerable.Empty<IPeriodExpensesSummary>();
     private DateOnly fromDate;
     private DateOnly toDate;
-
-    protected override Task OnInitializedAsync()
+    Grid<IExpense> expGrid = default!;
+    Tabs tabs = default!;
+    protected override async Task OnInitializedAsync()
     {
         now = DateTime.UtcNow;
         fromDate = new DateOnly(now.Year,now.Month,1);
         toDate = new DateOnly(now.Year,now.Month,DateTime.DaysInMonth(now.Year,now.Month));
 
-        ReloadExpenses();
+        await ReloadExpenses();
         ExpenseTypes = Enum.GetNames<ExpenseType>().ToArray();
         allSupplies = SoulFoodReportConfig.Instance.Supplies;
         ExpType = ExpenseTypes[0];
         Supplies = allSupplies[0];
+        //return Task.CompletedTask;
+    }
+    private HashSet<IExpense> selectedExpense = new();
+    private Task OnSelectedItemsChanged(HashSet<IExpense> expense)
+    {
+        selectedExpense = expense is not null && expense.Any() ? expense : new();
         return Task.CompletedTask;
+    }
+    private async Task<GridDataProviderResult<IExpense>> ExpensesDataProvider(GridDataProviderRequest<IExpense> request)
+    {
+        if (expenses is null) // pull employees only one time for client-side filtering, sorting, and paging
+            expenses = ExpenseService.GetExpenses(fromDate,toDate).ToArray(); // call a service or an API to pull the employees
+
+        return await Task.FromResult(request.ApplyTo(expenses));
     }
     protected async Task AddExpense() {
         Console.WriteLine("CreateOpenMovement....");
-        await Task.Delay(100);
-        var movement = soulFoodReport.Services.Movement.Create(now,Amount,MovementType.Expense,SourceType.Card);
         var expenseType = Enum.Parse<ExpenseType>(ExpType);
-        var expense = soulFoodReport.Services.Expense.Create(movement,expenseType,Supplies,Description);
-        var expenseStatus = ExpenseService.Add(expense);
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to add an expense?",
+            message1: $"You are creating it with {Amount}€ and type:{expenseType}",
+            message2: "Do you want to proceed?");
+        if (confirmation) {    
+            await Task.Delay(100);
+            var movement = soulFoodReport.Services.Movement.Create(now,Amount,MovementType.Expense,SourceType.Card);
+            var expense = soulFoodReport.Services.Expense.Create(movement,expenseType,Supplies,Description);
+            var expenseStatus = ExpenseService.Add(expense);
+            await ReloadExpenses();
+        }
+    }
+
+    protected async Task EditExpenses(IExpense selectedExpense) {
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("expense", selectedExpense);
+        parameters.Add("OnclickCallback", EventCallback.Factory.Create<IExpense>(this, UpdateExpense));
+        await modal.ShowAsync<ExpenseEdit>(title: "Expense Details", parameters: parameters);
+    }
+    protected async Task DeleteExpense(IExpense selectedExpense) {
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to Delete the selected expense?",
+            message1: $"You are deleting an {selectedExpense.Type} with amount:{selectedExpense.Amount}",
+            message2: "Do you want to proceed?");
+        if (confirmation) {    
+            ExpenseService.Delete(selectedExpense);
+            ReloadExpenses();
+        }
+    }
+    private void UpdateExpense(IExpense expense) {
+        ExpenseService.Update(expense);
         ReloadExpenses();
     }
-    private void ReloadExpenses() {
+    private async Task ReloadExpenses() {
         var startDate = DateOnly.FromDateTime(DateTime.Now);
         expenses = ExpenseService.GetExpenses(fromDate,toDate).ToArray();
+        if (selectedSupplies!=null) {
+            expenses = expenses.Where(e => e.Supplies==selectedSupplies);
+        }
+
         suppliesExpensesSummary = ExpensesSummary.CreateGroupedBySupplies(expenses);
         typeExpensesSummary = ExpensesSummary.CreateGroupedByExpType(expenses);
         periodExpensesSummaries = ExpensesSummary.CreateGroupedByWeeks(expenses);
         now = DateTime.UtcNow;
+        if (expGrid!=null) {
+            await expGrid.RefreshDataAsync();
+        }
+        selectedSupplies = null;
+    }
+    private string? selectedSupplies;
+    private async Task GetDetailsBySupplies(string supplies) {
+        selectedSupplies = supplies;
+        await ReloadExpenses();
+        await tabs.ShowTabByIndexAsync(0);
     }
 }

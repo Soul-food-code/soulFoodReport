@@ -10,19 +10,27 @@
 
 
 <h1>Day Report</h1>
-<div>
-    From Date: <input type="text" id="fromDate" @bind-value="@fromDate" />
-    To Date: <input type="text" id="toDate" @bind-value="@toDate" />
-    <button onclick="@SearchMovement">Search</button>
-    
+<div class="form-group row">
+    <label class="col-1 col-form-label">From Date:</label> <div class="col-2">  <DateInput TValue="DateOnly" @bind-Value="@fromDate" Placeholder="Enter Mov. Date" /> </div>
+    <label class="col-1 col-form-label">To Date: </label>  <div class="col-2">  <DateInput TValue="DateOnly" @bind-Value="@toDate" Placeholder="Enter Mov. Date" /> </div>
+    <div class="col-1"> <Button Color="ButtonColor.Primary" @onclick="() => SearchMovement()">Search</Button> </div>
 </div>
 <div>
-    Total Cash: @movementsSummary?.CashAmount
-    Total Card: @movementsSummary?.CardAmount
-    Total IN: @movementsSummary?.GetTotal()
-    Total Net: @movementsSummary?.GetTotalNet()
+    <div class="mb-3">
+    <Button Type="ButtonType.Button" Color="ButtonColor.Light" Size="ButtonSize.Large">
+        Total Cash <Badge Color="BadgeColor.Secondary">@movementsSummary?.CashAmount</Badge>
+    </Button>
+    <Button Type="ButtonType.Button" Color="ButtonColor.Light" Size="ButtonSize.Large">
+        Total Card <Badge Color="BadgeColor.Primary"> @movementsSummary?.CardAmount</Badge>
+    </Button>
+    <Button Type="ButtonType.Button" Color="ButtonColor.Light" Size="ButtonSize.Large">
+        Total IN <Badge Color="BadgeColor.Warning">@movementsSummary?.GetTotal()</Badge>
+    </Button>
+    <Button Type="ButtonType.Button" Color="ButtonColor.Light" Size="ButtonSize.Large">
+        Total NET <Badge Color="BadgeColor.Success">@movementsSummary?.GetTotalNet()</Badge>
+    </Button>
 
-
+    </div>
 </div>
 <div>
 Day Summaries:
@@ -84,20 +92,20 @@ Day Summaries:
     private IEnumerable<IMovement> movements = Enumerable.Empty<IMovement>(); 
 
     private IMovement[] OrderedMovements => movements.OrderBy(m => m.Date).ToArray();
-    private DateTime fromDate;
-    private DateTime toDate;
+    private DateOnly fromDate;
+    private DateOnly toDate;
     private MovementType? LatestMovementType => movements.Count() == 0 ? null : OrderedMovements?.Last()?.Type;
     private IMovementsSummary? movementsSummary = null;
     protected override Task OnInitializedAsync()
     {
         SearchMovement();
-        fromDate = DateTime.UtcNow;
-        toDate = DateTime.UtcNow;
+        fromDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        toDate = DateOnly.FromDateTime(DateTime.UtcNow);
         return Task.CompletedTask;
     }
     protected void SearchMovement() {
-        movements = MovementService.GetMovements(DateOnly.FromDateTime(fromDate),DateOnly.FromDateTime(toDate));
-        var expenses = ExpenseService.GetExpenses(DateOnly.FromDateTime(fromDate),DateOnly.FromDateTime(toDate));
+        movements = MovementService.GetMovements(fromDate,toDate);
+        var expenses = ExpenseService.GetExpenses(fromDate,toDate);
         movementsSummary = MovementSummary.Create(movements.Concat(expenses));
     }
 }

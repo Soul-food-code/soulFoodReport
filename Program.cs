@@ -2,6 +2,8 @@ using soulFoodReport.Components;
 using soulFoodReport.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("/config/appsettings.Development.json", true, true);
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -9,6 +11,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<IMovementService, DefaultMovementService>();
 builder.Services.AddScoped<IExpenseService, DefaultExpenseService>();
+builder.Services.AddBlazorBootstrap();
 
 var app = builder.Build();
 SoulFoodReportConfig.SetConfigurationManger(builder.Configuration);

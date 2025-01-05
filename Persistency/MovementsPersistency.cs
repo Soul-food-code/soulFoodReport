@@ -25,6 +25,25 @@ namespace soulFoodReport.Persistency {
             }
 
         }
+        public static bool Delete(IMovement movement)
+        {
+            try {
+                var periodFolder = $"{movement.Date.Year}-{movement.Date.Month.ToString("00")}";
+                var fullPath = Path.Combine(baseFolder,periodFolder);
+                var filePath = Path.Combine(fullPath,movement.GetFileName());
+                if (File.Exists(filePath)) {
+                    File.Delete(filePath);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex) {
+                Console.Error.WriteLine(ex);
+                return false;
+            }
+
+        }
+        
         public static IEnumerable<IMovement> LoadMovements((int Year,int Month) period) {
             try {
                 Console.Out.WriteLine("LoadMovements with period: " + period);
