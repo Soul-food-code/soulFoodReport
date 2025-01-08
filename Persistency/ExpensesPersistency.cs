@@ -8,6 +8,7 @@ namespace soulFoodReport.Persistency {
     public class ExpensesPersistency 
     {
         public const string SUB_FOLDER = "Expenses";
+        public const string CONFIG_FOLDER = "Config";
         public static bool Save(IExpense expenseDetail)
         {
             try {

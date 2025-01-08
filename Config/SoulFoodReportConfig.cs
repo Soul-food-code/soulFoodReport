@@ -1,8 +1,10 @@
 using System.Configuration;
+using soulFoodReport.Persistency;
 
 public interface ISoulFoodReportConfig {
     string PersistencyMainFolder {get;}
     string[] Supplies {get;}
+    string[] ExpensesTypes {get;}
 }
 public class SoulFoodReportConfig {
     public static ISoulFoodReportConfig Instance = new DefaultSoulFoodReportConfig();
@@ -13,7 +15,7 @@ public class SoulFoodReportConfig {
     private class DefaultSoulFoodReportConfig : ISoulFoodReportConfig
     {
         public string PersistencyMainFolder => _configurationManager?.GetValue<string>("PersistencyMainFolder") ?? "";
-        public string[] Supplies =>_configurationManager?.GetValue<string>("Supplies")?.Split(',') ?? ["Main"];
-
+        public string[] Supplies => ExpensesConfigPersistency.LoadSupplies().ToArray();
+        public string[] ExpensesTypes => ExpensesConfigPersistency.LoadExpTypes().ToArray();
     }
 }

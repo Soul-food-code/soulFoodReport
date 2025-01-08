@@ -17,6 +17,8 @@
 }
 else
 {
+    <Button Color="ButtonColor.Secondary" @onclick="() => EditExpTypes()">Expenses Types</Button>
+    <Button Color="ButtonColor.Dark" @onclick="() => EditSupplies()">Supplies List</Button>
     <div class="form-group row">
         <label class="col-1 col-form-label"> Date:</label> 
         <div class="col-2">
@@ -228,11 +230,14 @@ else
         toDate = new DateOnly(now.Year,now.Month,DateTime.DaysInMonth(now.Year,now.Month));
 
         await ReloadExpenses();
-        ExpenseTypes = Enum.GetNames<ExpenseType>().ToArray();
-        allSupplies = SoulFoodReportConfig.Instance.Supplies;
+        LoadExpTypesAndSupplies();
         ExpType = ExpenseTypes[0];
         Supplies = allSupplies[0];
         //return Task.CompletedTask;
+    }
+    private void LoadExpTypesAndSupplies() {
+        ExpenseTypes = SoulFoodReportConfig.Instance.ExpensesTypes;
+        allSupplies = SoulFoodReportConfig.Instance.Supplies;
     }
     private HashSet<IExpense> selectedExpense = new();
     private Task OnSelectedItemsChanged(HashSet<IExpense> expense)
@@ -278,6 +283,14 @@ else
             ExpenseService.Delete(selectedExpense);
             ReloadExpenses();
         }
+    }
+    protected async Task EditExpTypes() {
+        await modal.ShowAsync<ExpenseTypesEdit>(title: "Expense Details", parameters: new Dictionary<string, object>());
+        LoadExpTypesAndSupplies();
+    }
+    protected async Task EditSupplies() {
+        await modal.ShowAsync<SuppliesEdit>(title: "Supplies List", parameters: new Dictionary<string, object>());
+        LoadExpTypesAndSupplies();
     }
     private void UpdateExpense(IExpense expense) {
         ExpenseService.Update(expense);
