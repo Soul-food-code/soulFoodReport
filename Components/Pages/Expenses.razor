@@ -261,6 +261,10 @@ else
             message2: "Do you want to proceed?");
         if (confirmation) {    
             await Task.Delay(100);
+            if (now.TimeOfDay.Hours==0 && now.TimeOfDay.Minutes==0 && now.TimeOfDay.Seconds == 0) {
+                var utcNow = DateTime.UtcNow; 
+                now = now.Add(utcNow.TimeOfDay);
+            }
             var movement = soulFoodReport.Services.Movement.Create(now,Amount,MovementType.Expense,SourceType.Card);
             var expense = soulFoodReport.Services.Expense.Create(movement,expenseType,Supplies,Description);
             var expenseStatus = ExpenseService.Add(expense);
