@@ -95,8 +95,8 @@ else
             <GridColumn TItem="IExpense" HeaderText="Type" PropertyName="Type">
                 @context.Type
             </GridColumn>
-            <GridColumn TItem="IExpense" HeaderText="ExpenseType" PropertyName="ExpenseType" SortKeySelector="item => item.ExpenseType">
-                @context.ExpenseType
+            <GridColumn TItem="IExpense" HeaderText="ExpenseType" PropertyName="ExpType" SortKeySelector="item => item.ExpType">
+                @context.ExpType
             </GridColumn>
             <GridColumn TItem="IExpense" HeaderText="Supplies" PropertyName="Supplies" SortKeySelector="item => item.Supplies">
                 @context.Supplies
@@ -211,7 +211,7 @@ else
     private IExpense[] OrderedExpenses => expenses.OrderBy(m => m.Date).ToArray();
     private DateTime now;
     private decimal Amount {get;set;} = 0;
-    private string ExpType {get;set;} = ExpenseType.Other.ToString();
+    private string ExpType {get;set;} = "Other";
     private string Supplies {get;set;} = "";
     private string Description {get;set;} = "";
     private string[] ExpenseTypes = [""];
@@ -254,10 +254,9 @@ else
     }
     protected async Task AddExpense() {
         Console.WriteLine("CreateOpenMovement....");
-        var expenseType = Enum.Parse<ExpenseType>(ExpType);
         var confirmation = await dialog.ShowAsync(
             title: "Are you sure you want to add an expense?",
-            message1: $"You are creating it with {Amount}€ and type:{expenseType}",
+            message1: $"You are creating it with {Amount}€ and type:{ExpType}",
             message2: "Do you want to proceed?");
         if (confirmation) {    
             await Task.Delay(100);
@@ -266,7 +265,9 @@ else
                 now = now.Add(utcNow.TimeOfDay);
             }
             var movement = soulFoodReport.Services.Movement.Create(now,Amount,MovementType.Expense,SourceType.Card);
-            var expense = soulFoodReport.Services.Expense.Create(movement,expenseType,Supplies,Description);
+            Console.WriteLine("CreateExpenses.... ExpType:" + ExpType + " Supplies:" + Supplies);
+
+            var expense = soulFoodReport.Services.Expense.Create(movement,ExpType,Supplies,Description);
             var expenseStatus = ExpenseService.Add(expense);
             await ReloadExpenses();
         }
