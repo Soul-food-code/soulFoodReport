@@ -45,7 +45,7 @@ namespace soulFoodReport.Services {
     {
         public TypeExpensesSummary(IEnumerable<IExpense> expenses)
         {
-            ExpenseTypeData = expenses.GroupBy(e => e.ExpenseType).Select(
+            ExpenseTypeData = expenses.GroupBy(e => e.ExpType).Select(
                 g => (g.Key.ToString(),g.Sum(s => s.Amount)));
 
             if (expenses.Count() > 0) {
