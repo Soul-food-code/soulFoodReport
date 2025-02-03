@@ -24,7 +24,9 @@ public class ExpensesConfigPersistency
         }
         public static IEnumerable<string> LoadExpTypes() {
             try {
+
                 var expTypesFile = Path.Combine(baseFolder,EXPENSES_TYPES_FILE);
+                Console.Error.WriteLine("LoadExpTypes... Checking :" + expTypesFile);
                 if (File.Exists(expTypesFile)) {
                     return File.ReadAllLines(expTypesFile);
                 }
