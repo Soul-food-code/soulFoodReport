@@ -1,6 +1,7 @@
 ﻿@page "/expenses"
 @using soulFoodReport.Services
 @using System.Linq;
+@using soulFoodReport.Components.Shared
 
 @attribute [StreamRendering]
 @rendermode InteractiveServer
@@ -57,20 +58,7 @@ else
     </div>
 
     <p> Expenses Filter </p>
-
-     <div class="form-group row">
-        <label class="col-1 col-form-label">From Date: </label> 
-        <div class="col-2">
-            <DateInput TValue="DateOnly" @bind-Value="@fromDate" Placeholder="From Date" /> 
-        </div>
-        <label class="col-1 col-form-label">To Date: </label> 
-        <div class="col-2">
-            <DateInput TValue="DateOnly" @bind-Value="@toDate" Placeholder="To Date" />
-        </div>
-        <div class="col-1">
-            <button onclick="@ReloadExpenses">Search</button>
-        </div>
-    </div>
+    <DatePeriod OnSearch="@ReloadExpenses" />
     <p> Total Expenses : @OrderedExpenses.Sum(e => e.Amount)</p>
 <Tabs @ref="tabs">
 <Tab Title="Details" Active="true">
@@ -231,8 +219,8 @@ else
 
         await ReloadExpenses();
         LoadExpTypesAndSupplies();
-        ExpType = ExpenseTypes[0];
-        Supplies = allSupplies[0];
+        ExpType = ExpenseTypes.Length > 0 ? ExpenseTypes[0] : "";
+        Supplies = allSupplies.Length > 0 ? allSupplies[0] : "";
         //return Task.CompletedTask;
     }
     private void LoadExpTypesAndSupplies() {

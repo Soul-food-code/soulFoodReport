@@ -1,5 +1,6 @@
 ﻿@page "/movements"
 @using soulFoodReport.Services
+@using soulFoodReport.Components.Shared
 @using System.Linq;
 
 @attribute [StreamRendering]
@@ -34,11 +35,9 @@ else
     <p> Movement Filter </p>
 
     <div>
-        <span> From Date: </span> <input type="text" id="fromDate" @bind-value="@fromDate" />
-        <span>To Date: </span> <input type="text" id="toDate" @bind-value="@toDate" />
-        <button onclick="@ReloadMovements">Search</button>
-    
+        <DatePeriod OnSearch="@ReloadMovements" />
     </div>
+        
 
     <table class="table">
         <thead>
