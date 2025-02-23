@@ -14,12 +14,10 @@ COPY --from=build-stage /app /app
 COPY soulFoodReport.csproj /app/
 COPY ./Properties /app/Properties
 
-EXPOSE 8080
-
 # Runtime image
 WORKDIR /app
 
 RUN echo '\n\ 
-dotnet soulFoodReport.dll' > /app/start.sh
+    dotnet soulFoodReport.dll' > /app/start.sh
 RUN chmod a+x /app/start.sh
 CMD "./start.sh"
