@@ -5,8 +5,9 @@ services:
       APP_VERSION: "0.1.1"
     image: algiro/soulfoodcafe-report:latest
     volumes:
-      - soulFoodMovs:${SOULFOOD_MOVS_VOLUME}
-      - certs:${CERTS_VOLUME}
+      - type: bind
+        source: ${SOULFOOD_MOVS_VOLUME}
+        target: /data/soulFoodMovs
     ports: []
     networks:
       - microservices
