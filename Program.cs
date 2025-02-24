@@ -1,4 +1,5 @@
 using soulFoodReport.Components;
+using soulFoodReport.Config;
 using soulFoodReport.Services;
 
 var builder = WebApplication.CreateBuilder(args);

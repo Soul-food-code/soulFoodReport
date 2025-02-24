@@ -1,24 +1,27 @@
 using System.Configuration;
 using soulFoodReport.Persistency;
 
-public interface ISoulFoodReportConfig
+namespace soulFoodReport.Config
 {
-    string PersistencyMainFolder { get; }
-    string[] Supplies { get; }
-    string[] ExpensesTypes { get; }
-}
-public class SoulFoodReportConfig
-{
-    public static ISoulFoodReportConfig Instance = new DefaultSoulFoodReportConfig();
-    public static void SetConfigurationManger(ConfigurationManager configuration)
+    public interface ISoulFoodReportConfig
     {
-        _configurationManager = configuration;
+        string PersistencyMainFolder { get; }
+        string[] Supplies { get; }
+        string[] ExpensesTypes { get; }
     }
-    private static ConfigurationManager? _configurationManager;
-    private sealed class DefaultSoulFoodReportConfig : ISoulFoodReportConfig
+    public class SoulFoodReportConfig
     {
-        public string PersistencyMainFolder { get; } = "/data/soulFoodMovs"; // default volume target
-        public string[] Supplies => ExpensesConfigPersistency.LoadSupplies().ToArray();
-        public string[] ExpensesTypes => ExpensesConfigPersistency.LoadExpTypes().ToArray();
+        public static ISoulFoodReportConfig Instance = new DefaultSoulFoodReportConfig();
+        public static void SetConfigurationManger(ConfigurationManager configuration)
+        {
+            _configurationManager = configuration;
+        }
+        private static ConfigurationManager? _configurationManager;
+        private sealed class DefaultSoulFoodReportConfig : ISoulFoodReportConfig
+        {
+            public string PersistencyMainFolder { get; } = "/data/soulFoodMovs"; // default volume target
+            public string[] Supplies => ExpensesConfigPersistency.LoadSupplies().ToArray();
+            public string[] ExpensesTypes => ExpensesConfigPersistency.LoadExpTypes().ToArray();
+        }
     }
 }
