@@ -1,6 +1,8 @@
 services:
   web:
     container_name: report-web
+    environment:
+      APP_VERSION: "0.1.1"
     image: algiro/soulfoodcafe-report:latest
     volumes:
       - soulFoodMovs:${SOULFOOD_MOVS_VOLUME}
