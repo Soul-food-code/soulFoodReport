@@ -1,0 +1,14 @@
+@page "/about"
+@inject IConfiguration Configuration
+
+<h1>About</h1>
+
+<p>Application Version: @GetAppVersion()</p>
+
+@code {
+    private string GetAppVersion()
+    {
+        string version = Configuration["APP_VERSION"] ?? "NA";
+        return version;
+    }
+}
