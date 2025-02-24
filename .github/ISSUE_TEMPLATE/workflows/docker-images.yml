@@ -1,0 +1,12 @@
+jobs:
+  publish_images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build image
+        run: docker build . -t algiro/soulfoodcafe-report:latest
+      - name: Push image to DockerHub
+        run: |
+          docker login -u algiro -p ${{ secrets.DOCKER_HUB_TOKEN }}
+          docker push algiro/soulfoodcafe-report:latest
